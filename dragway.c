@@ -76,7 +76,7 @@ int main() {
 	struct Tire tires[bufferSize];
 
 	int numEngines = 2; // could replace with end of file line detection
-	int numTrans = 4;	//and increment these variables....this works fine
+	int numTrans = 7;	//and increment these variables....this works fine
 	int numDiffs = 3;
 	int numTires = 2;
 
