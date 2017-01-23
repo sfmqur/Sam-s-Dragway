@@ -1,2 +1,4 @@
-Vortec 4.2L I6, 275, 7000
-Vortec 5.3L V8, 326, 6000
+Vortec 4.2L I6 
+275 7000
+Vortec 5.3L V8
+326 6000

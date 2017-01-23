@@ -1,2 +1,4 @@
-29 inch, 29
-33 inch, 33
+29 inch 
+29
+33 inch
+33
