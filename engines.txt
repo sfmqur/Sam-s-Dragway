@@ -1,4 +1,8 @@
 Vortec 4.2L I6 
-275 7000
+275 6250
 Vortec 5.3L V8
 326 6000
+Vortec 6.0L V8
+390 5500
+Hoondai 1.6L I4
+110 6500
