@@ -131,8 +131,8 @@ int main() {
 
 	int numEngines = 4; // could replace with end of file line detection
 	int numTrans = 7;	//and increment these variables....this works fine
-	int numDiffs = 3;
-	int numTires = 2;
+	int numDiffs = 4;
+	int numTires = 5;
 
 //import parts data from files
 //import engine data
@@ -152,7 +152,7 @@ int main() {
 	if (fp == NULL) { //ends program if there is a file reading error
 		printf("Error from reading from file: transmissions.txt");
 	}
-	for (i = 0; i < numTrans; i++) {//TODO: 0.1 this isn't working, it gets first gear but none of the others
+	for (i = 0; i < numTrans; i++) {
 		fgets(trannies[i].name, bufferSize, fp);
 		trannies[i].name[strlen(trannies[i].name) - 1] = '\0'; //removes newline
 		fscanf(fp, "%d %lf %lf %lf %lf %lf %lf\n", &trannies[i].numGears,
