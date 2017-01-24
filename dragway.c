@@ -1,5 +1,5 @@
 /*
- * dragway.c
+ * dragway.c //TODO: 1.0 fix header
  *
  *  Created on: Jan 18, 2017
  *      Author: Sam
@@ -20,7 +20,7 @@ struct Engine {
 };
 struct Transmission {
 	char name[bufferSize];
-	double numGears;
+	int numGears;
 	double ratios[6]; //6 speed transmissions max
 };
 struct Differential {
@@ -43,9 +43,9 @@ void quit(int *done) {
 	}
 }
 
-//TODO: opponents time rename this function to return a double(time) and create new racing function.
+//TODO: 0.2 opponents time rename this function to return a double(time) and create new racing function.
 double dragCalc(struct Engine engine, struct Transmission trans,
-		struct Differential diff, struct Tire tire) {
+		struct Differential diff, struct Tire tire) {//TODO: 0.1 z make sure this works after fixing trans import from file
 	double time = 0.0;
 	double myTime = 0;
 	double distance = 5280 / 4; //quarter mile drag
@@ -64,10 +64,11 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 			if (rpm + (drdt * step) > engine.redline) { //does little time step
 				tempdrdt = engine.redline - rpm;
 				rpm += tempdrdt;
-				time += 1 / (rpmPerSecond * engine.hp / tempdrdt);
+				tempstep = 1 / (rpmPerSecond * engine.hp / tempdrdt);
+				time += tempstep;
 				mySpeed = rpm / trans.ratios[gear - 1] / diff.ratio * pi
 						* tire.size * 60 / 12; //feet per second
-				myDistance += mySpeed * step;
+				myDistance += mySpeed * tempstep;
 				if (gear != trans.numGears) { //switches gears if not in max gear
 					gear++;
 				}
@@ -77,7 +78,7 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 			rpm = drdt * time; //eliminates roundoff error
 			mySpeed = rpm / trans.ratios[gear - 1] / diff.ratio * pi * tire.size
 					* 60 / 12; //feet per second
-			myDistance += mySpeed * step; // TODO: may exceed quarter mile
+			myDistance += mySpeed * step; // TODO: 0.2 may exceed quarter mile
 		} else {
 			myDistance += mySpeed * step;
 		}
@@ -97,7 +98,7 @@ void specs(struct Engine engine, struct Transmission trans,
 
 	printf("Engine: %s %g horsepower %g RPM redline\n", engine.name, engine.hp,
 			engine.redline);
-	printf("Transmission: %s, %d gears ",trans.name,trans.numGears);
+	printf("Transmission: %s\n %d gears ",trans.name,trans.numGears);
 	for (i = 0; i < trans.numGears; i++){
 		printf("%g ",trans.ratios[i]);
 		if (i == trans.numGears - 1){
@@ -121,7 +122,6 @@ int main() {
 	char choice[bufferSize];
 	int i = 0;
 	FILE *fp;
-	int switcher = 0; //used to alternate reading strings and numbers from files each line
 
 //parts arrays
 	struct Engine engines[bufferSize];
@@ -152,7 +152,7 @@ int main() {
 	if (fp == NULL) { //ends program if there is a file reading error
 		printf("Error from reading from file: transmissions.txt");
 	}
-	for (i = 0; i < numTrans; i++) {
+	for (i = 0; i < numTrans; i++) {//TODO: 0.1 this isn't working, it gets first gear but none of the others
 		fgets(trannies[i].name, bufferSize, fp);
 		trannies[i].name[strlen(trannies[i].name) - 1] = '\0'; //removes newline
 		fscanf(fp, "%d %lf %lf %lf %lf %lf %lf\n", &trannies[i].numGears,
