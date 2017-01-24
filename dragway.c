@@ -45,10 +45,10 @@ void quit(int *done) {
 
 //TODO: 0.2 opponents time rename this function to return a double(time) and create new racing function.
 double dragCalc(struct Engine engine, struct Transmission trans,
-		struct Differential diff, struct Tire tire) {//TODO: 0.1 z make sure this works after fixing trans import from file
+		struct Differential diff, struct Tire tire) {
 	double time = 0.0;
 	double myTime = 0;
-	double distance = 5280 / 4; //quarter mile drag
+	double distance = 0.25; //quarter mile drag in mi
 	double myDistance = 0;
 	double mySpeed = 0;
 	double rpm = 0;
@@ -57,33 +57,48 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 	double tempdrdt = 0; //used when drdt + rpm exceeds redline
 	double tempstep = 0; //used when drdt + rpm exceeds redline
 	int gear = 1;
-	double step = 0.1;
+	double step = 0.1; //seconds
 
 	while (myDistance < distance) {
-		if (gear != trans.numGears && rpm != engine.redline) { //check to make sure engine and trans are not maxed out
+		if (gear == trans.numGears && rpm == engine.redline) {
+			time += step;
+			myDistance += mySpeed * step / 3600;
+			if (DEBUG)
+				printf("%4g seconds %g RPM %d gear %g speed %g mi maxGear\n",
+						time, rpm, gear, mySpeed, myDistance);
+		} else {
 			if (rpm + (drdt * step) > engine.redline) { //does little time step
 				tempdrdt = engine.redline - rpm;
 				rpm += tempdrdt;
 				tempstep = 1 / (rpmPerSecond * engine.hp / tempdrdt);
 				time += tempstep;
 				mySpeed = rpm / trans.ratios[gear - 1] / diff.ratio * pi
-						* tire.size * 60 / 12; //feet per second
-				myDistance += mySpeed * tempstep;
-				if (gear != trans.numGears) { //switches gears if not in max gear
+						* tire.size / 12 / 5280 * 60; //miles an hour
+				myDistance += mySpeed * tempstep / 3600;
+				if (DEBUG)
+					printf(
+							"%4g seconds %g RPM %d gear %g speed %g mi stubStep\n",
+							time, rpm, gear, mySpeed, myDistance);
+				if (gear < trans.numGears) { //switches gears if not in max gear
+					rpm = 0;
 					gear++;
 				}
 				continue;
-			}
+			}//end little time step
 			time += step;
-			rpm = drdt * time; //eliminates roundoff error
+			rpm += drdt * step; //eliminates roundoff error
 			mySpeed = rpm / trans.ratios[gear - 1] / diff.ratio * pi * tire.size
-					* 60 / 12; //feet per second
-			myDistance += mySpeed * step; // TODO: 0.2 may exceed quarter mile
-		} else {
-			myDistance += mySpeed * step;
-		}
-	}
-	return mySpeed;
+					/ 12 / 5280 * 60; //feet per second
+			myDistance += mySpeed * step / 3600; // TODO: 0.2 may exceed quarter mile
+			if (DEBUG)
+				printf("%4g seconds %g RPM %d gear %g speed %g mi main\n", time,
+						rpm, gear, mySpeed, myDistance);
+		}//end of else ie acceleration period
+	}//end of while loop
+	myTime = time;
+	if (DEBUG)
+		printf("maxGear: %d\n", trans.numGears);
+	return myTime;
 }
 
 void drag(struct Engine engine, struct Transmission trans,
@@ -98,21 +113,21 @@ void specs(struct Engine engine, struct Transmission trans,
 
 	printf("Engine: %s %g horsepower %g RPM redline\n", engine.name, engine.hp,
 			engine.redline);
-	printf("Transmission: %s\n %d gears ",trans.name,trans.numGears);
-	for (i = 0; i < trans.numGears; i++){
-		printf("%g ",trans.ratios[i]);
-		if (i == trans.numGears - 1){
+	printf("Transmission: %s\n %d gears ", trans.name, trans.numGears);
+	for (i = 0; i < trans.numGears; i++) {
+		printf("%g ", trans.ratios[i]);
+		if (i == trans.numGears - 1) {
 			printf("\n");
 		}
 	}
-	printf("Differential: %g\n",diff.ratio);
-	printf("Tires: %g inches\n",tire.size);
+	printf("Differential: %g\n", diff.ratio);
+	printf("Tires: %g inches\n", tire.size);
 }
 
 void test(struct Transmission trans) {
 	int i;
 	for (i = 0; i < trans.numGears; i++) {
-		printf("%g ",trans.ratios[i]);
+		printf("%g ", trans.ratios[i]);
 	}
 }
 
