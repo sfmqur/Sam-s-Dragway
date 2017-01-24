@@ -107,7 +107,7 @@ void drag(struct Engine engine, struct Transmission trans,
 
 	//Randomly Generate Opponents times
 	int oppParts[numOpponents][4]; //4 is number of parts on car
-	double scores[numOpponents];
+	double scores[numOpponents + 1];
 	int i; //for loop variables
 
 	//generate opponents specs
@@ -125,7 +125,33 @@ void drag(struct Engine engine, struct Transmission trans,
 	}
 	printf("\n");
 	//TODO: 0.2 tell user what place they were
+	scores[numOpponents] = myTime; // adds my time in the array
+	int sortComplete;
+	double temp;
+	int place;
+
+	//bubble sort the scores
+	for (sortComplete = numOpponents; sortComplete > 0; sortComplete--) {
+		for (i = 0; i < sortComplete; i++) {
+			if (scores[i] > scores[i + 1]) {
+				temp = scores[i];
+				scores[i] = scores[i + 1];
+				scores[i + 1] = temp;
+			}
+		}
+	} //end bubble sort
+
+	printf("The standings are:\n");
+	for (i = 0; i <= numOpponents; i++) {
+		printf("%g seconds\n", scores[i]);
+		if (myTime == scores[i]){ //assign place
+			place = i + 1;
+		}
+	}
+	printf("\nYou got place %d\n\n",place);
 }
+
+//TODO: 1.0 shop and inventory functions here
 
 void specs(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire) {
