@@ -6,3 +6,5 @@ Vortec 6.0L V8
 390 5500
 Hoondai 1.6L I4
 110 6500
+Coyote 5.0L V8
+412 7000

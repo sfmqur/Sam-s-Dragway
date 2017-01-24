@@ -15,7 +15,7 @@
 #define numOpponents 5
 
 //number of each part
-const int numEngines = 4; // could replace with end of file line detection
+const int numEngines = 5; // could replace with end of file line detection
 const int numTrans = 7;	//and increment these variables....this works fine
 const int numDiffs = 4;
 const int numTires = 5;
@@ -60,7 +60,7 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 	double myDistance = 0;
 	double mySpeed = 0;
 	double rpm = 0;
-	double rpmPerSecond = 5.156271577; //RPM per second per horsepower, default vehicle 0-60 is 7.9 seconds(Chevy Trailblazer)
+	double rpmPerSecond = 4.156271577; //RPM per second per horsepower, default vehicle 0-60 is 7.9 seconds(Chevy Trailblazer), this 5.15 is default
 	double drdt = rpmPerSecond * engine.hp;
 	double tempdrdt = 0; //used when drdt + rpm exceeds redline
 	double tempstep = 0; //used when drdt + rpm exceeds redline
@@ -105,7 +105,7 @@ void drag(struct Engine engine, struct Transmission trans,
 	double myTime = dragCalc(engine, trans, diff, tire);
 	printf("\nMy time is %g seconds\n\n", myTime);
 
-	//TODO: 0.2 Randomly Generate Opponents times
+	//Randomly Generate Opponents times
 	int oppParts[numOpponents][4]; //4 is number of parts on car
 	double scores[numOpponents];
 	int i; //for loop variables
