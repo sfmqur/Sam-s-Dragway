@@ -7,10 +7,18 @@
 
 #include<stdio.h>
 #include<string.h>
+#include<stdlib.h>
 
 #define DEBUG 1
 #define bufferSize 50
 #define pi 3.14159265358979
+#define numOpponents 5
+
+//number of each part
+const int numEngines = 4; // could replace with end of file line detection
+const int numTrans = 7;	//and increment these variables....this works fine
+const int numDiffs = 4;
+const int numTires = 5;
 
 //structures
 struct Engine {
@@ -38,13 +46,13 @@ void quit(int *done) {
 	printf("Are you sure you want to quit (yes or no)\n");
 	fgets(choice, bufferSize, stdin);
 	choice[strlen(choice) - 1] = '\0'; //removes newline
-	if (!strcmp(choice, "yes")) {
+	if (!strcmp(choice, "yes") || !strcmp(choice, "y")) {
 		*done = 1;
 	}
 }
 
 //results is a 2 element array, element 0 is time, 1 is speed
-void dragCalc(double *results, struct Engine engine, struct Transmission trans,
+double dragCalc(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire) {
 	double time = 0.0;
 	double myTime = 0;
@@ -86,17 +94,36 @@ void dragCalc(double *results, struct Engine engine, struct Transmission trans,
 		} //end of else ie acceleration period
 	} //end of while loop
 	myTime = time;
-	results[0] = myTime;
-	results[1] = mySpeed;
+	return myTime;
 }
 
 void drag(struct Engine engine, struct Transmission trans,
-		struct Differential diff, struct Tire tire) {
+		struct Differential diff, struct Tire tire, struct Engine *engines,
+		struct Transmission *trannies, struct Differential *diffs,
+		struct Tire *tires) {
 	//calculate your time
-	double myScore[2];
-	dragCalc(myScore, engine, trans, diff, tire);
-	printf("\nMy time is %g seconds at %g MPH\n", myScore[0],myScore[1]);
+	double myTime = dragCalc(engine, trans, diff, tire);
+	printf("\nMy time is %g seconds\n\n", myTime);
+
 	//TODO: 0.2 Randomly Generate Opponents times
+	int oppParts[numOpponents][4]; //4 is number of parts on car
+	double scores[numOpponents];
+	int i; //for loop variables
+
+	//generate opponents specs
+	for (i = 0; i < numOpponents; i++) {
+		oppParts[i][0] = rand() % numEngines;
+		oppParts[i][1] = rand() % numTrans;
+		oppParts[i][2] = rand() % numDiffs;
+		oppParts[i][3] = rand() % numTires;
+		scores[i] = dragCalc(engines[oppParts[i][0]], trannies[oppParts[i][1]],
+				diffs[oppParts[i][2]], tires[oppParts[i][3]]);
+	}
+
+	for (i = 0; i < numOpponents; i++) {
+		printf("Opponent %d: %g seconds\n", i + 1, scores[i]);
+	}
+	printf("\n");
 	//TODO: 0.2 tell user what place they were
 }
 
@@ -104,9 +131,9 @@ void specs(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire) {
 	int i;
 
-	printf("\nEngine: %s %g horsepower %g RPM redline\n", engine.name, engine.hp,
-			engine.redline);
-	printf("Transmission: %s\n %d gears ", trans.name, trans.numGears);
+	printf("\nEngine: %s %g horsepower %g RPM redline\n", engine.name,
+			engine.hp, engine.redline);
+	printf("Transmission: %s %d gears ", trans.name, trans.numGears);
 	for (i = 0; i < trans.numGears; i++) {
 		printf("%g ", trans.ratios[i]);
 		if (i == trans.numGears - 1) {
@@ -136,11 +163,6 @@ int main() {
 	struct Transmission trannies[bufferSize];
 	struct Differential diffs[bufferSize];
 	struct Tire tires[bufferSize];
-
-	int numEngines = 4; // could replace with end of file line detection
-	int numTrans = 7;	//and increment these variables....this works fine
-	int numDiffs = 4;
-	int numTires = 5;
 
 //import parts data from files
 //import engine data
@@ -210,7 +232,8 @@ int main() {
 		} else if (!strcmp(choice, "quit")) {
 			quit(&done);
 		} else if (!strcmp(choice, "drag")) {
-			drag(myEngine, myTrans, myDiff, myTire);
+			drag(myEngine, myTrans, myDiff, myTire, engines, trannies, diffs,
+					tires);
 		} else if (!strcmp(choice, "specs")) {
 			specs(myEngine, myTrans, myDiff, myTire);
 		} else if (!strcmp(choice, "test") && DEBUG) {
