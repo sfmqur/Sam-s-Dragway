@@ -20,6 +20,8 @@ const int numTrans = 7;	//and increment these variables....this works fine
 const int numDiffs = 4;
 const int numTires = 5;
 
+double money = 0;
+
 //structures
 struct Engine {
 	char name[bufferSize];
@@ -90,7 +92,7 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 			rpm += drdt * step; //eliminates roundoff error
 			mySpeed = rpm / trans.ratios[gear - 1] / diff.ratio * pi * tire.size
 					/ 12 / 5280 * 60; //feet per second
-			myDistance += mySpeed * step / 3600; // TODO: 0.3 may exceed quarter mile
+			myDistance += mySpeed * step / 3600;
 		} //end of else ie acceleration period
 	} //end of while loop
 	myTime = time;
@@ -101,6 +103,10 @@ void drag(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire, struct Engine *engines,
 		struct Transmission *trannies, struct Differential *diffs,
 		struct Tire *tires) {
+
+	double winnings=0;
+	double maxWinnings = 300; //winnings if you get 1st place
+
 	//calculate your time
 	double myTime = dragCalc(engine, trans, diff, tire);
 	printf("\nMy time is %g seconds\n\n", myTime);
@@ -120,11 +126,14 @@ void drag(struct Engine engine, struct Transmission trans,
 				diffs[oppParts[i][2]], tires[oppParts[i][3]]);
 	}
 
+	//TODO: 0.4 live feed of race
+
 	for (i = 0; i < numOpponents; i++) {
 		printf("Opponent %d: %g seconds\n", i + 1, scores[i]);
 	}
 	printf("\n");
-	//TODO: 0.2 tell user what place they were
+
+	//tell user what place they are
 	scores[numOpponents] = myTime; // adds my time in the array
 	int sortComplete;
 	double temp;
@@ -148,7 +157,14 @@ void drag(struct Engine engine, struct Transmission trans,
 			place = i + 1;
 		}
 	}
-	printf("\nYou got place %d\n\n",place);
+
+	//give winnings based on time differential between you and top score
+	if (place <= numOpponents){
+		winnings = scores[0]/myTime * maxWinnings;
+		money += winnings;
+	}
+
+	printf("\nYou got place %d and earned $%g\n\n",place,winnings);
 }
 
 //TODO: 1.0 shop and inventory functions here
@@ -157,6 +173,7 @@ void specs(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire) {
 	int i;
 
+	printf("\nYou have $%g\n",money);
 	printf("\nEngine: %s %g horsepower %g RPM redline\n", engine.name,
 			engine.hp, engine.redline);
 	printf("Transmission: %s %d gears ", trans.name, trans.numGears);
