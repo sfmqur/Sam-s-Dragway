@@ -5,9 +5,11 @@
  *      Author: Sam
  */
 
+#include<math.h>
 #include<stdio.h>
-#include<string.h>
 #include<stdlib.h>
+#include<string.h>
+#include<unistd.h>
 
 #define DEBUG 1
 #define bufferSize 50
@@ -55,9 +57,11 @@ void quit(int *done) {
 
 //results is a 2 element array, element 0 is time, 1 is speed
 double dragCalc(struct Engine engine, struct Transmission trans,
-		struct Differential diff, struct Tire tire) {
+		struct Differential diff, struct Tire tire, int isPlayer) {
+	//isPlayer used to create live feed of drag
 	double time = 0.0;
 	double myTime = 0;
+	double lastShift = 0; //used for live feed to time it.
 	double distance = 0.25; //quarter mile drag in mi
 	double myDistance = 0;
 	double mySpeed = 0;
@@ -68,6 +72,14 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 	double tempstep = 0; //used when drdt + rpm exceeds redline
 	int gear = 1;
 	double step = 0.01; //seconds
+
+	if (isPlayer) {
+		printf("\nREADY\n");
+		sleep(1);
+		printf("SET\n");
+		sleep(1);
+		printf("GO!!!\n");
+	}
 
 	while (myDistance < distance) {
 		if (gear == trans.numGears && rpm == engine.redline) {
@@ -85,6 +97,11 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 				if (gear < trans.numGears) { //switches gears if not in max gear
 					rpm = 0;
 					gear++;
+					if(isPlayer) {
+						sleep(round(time-lastShift));
+						printf("You shift into gear %d at %g seconds\n",gear,time);
+						lastShift = time;
+					}
 				}
 				continue;
 			} //end little time step
@@ -95,6 +112,13 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 			myDistance += mySpeed * step / 3600;
 		} //end of else ie acceleration period
 	} //end of while loop
+
+	if(isPlayer){
+		sleep(round(time-lastShift));
+		printf("FINISHED!!!\n\nYou finished in %g seconds at %g MPH\n\n",time,mySpeed);
+	}
+
+
 	myTime = time;
 	return myTime;
 }
@@ -104,12 +128,11 @@ void drag(struct Engine engine, struct Transmission trans,
 		struct Transmission *trannies, struct Differential *diffs,
 		struct Tire *tires) {
 
-	double winnings=0;
+	double winnings = 0;
 	double maxWinnings = 300; //winnings if you get 1st place
 
 	//calculate your time
-	double myTime = dragCalc(engine, trans, diff, tire);
-	printf("\nMy time is %g seconds\n\n", myTime);
+	double myTime = dragCalc(engine, trans, diff, tire, 1);
 
 	//Randomly Generate Opponents times
 	int oppParts[numOpponents][4]; //4 is number of parts on car
@@ -123,10 +146,8 @@ void drag(struct Engine engine, struct Transmission trans,
 		oppParts[i][2] = rand() % numDiffs;
 		oppParts[i][3] = rand() % numTires;
 		scores[i] = dragCalc(engines[oppParts[i][0]], trannies[oppParts[i][1]],
-				diffs[oppParts[i][2]], tires[oppParts[i][3]]);
+				diffs[oppParts[i][2]], tires[oppParts[i][3]], 0);
 	}
-
-	//TODO: 0.4 live feed of race
 
 	for (i = 0; i < numOpponents; i++) {
 		printf("Opponent %d: %g seconds\n", i + 1, scores[i]);
@@ -153,18 +174,18 @@ void drag(struct Engine engine, struct Transmission trans,
 	printf("The standings are:\n");
 	for (i = 0; i <= numOpponents; i++) {
 		printf("%g seconds\n", scores[i]);
-		if (myTime == scores[i]){ //assign place
+		if (myTime == scores[i]) { //assign place
 			place = i + 1;
 		}
 	}
 
 	//give winnings based on time differential between you and top score
-	if (place <= numOpponents){
-		winnings = scores[0]/myTime * maxWinnings;
+	if (place <= numOpponents) {
+		winnings = scores[0] / myTime * maxWinnings;
 		money += winnings;
 	}
 
-	printf("\nYou got place %d and earned $%g\n\n",place,winnings);
+	printf("\nYou got place %d and earned $%g\n\n", place, winnings);
 }
 
 //TODO: 1.0 shop and inventory functions here
@@ -173,7 +194,7 @@ void specs(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire) {
 	int i;
 
-	printf("\nYou have $%g\n",money);
+	printf("\nYou have $%g\n", money);
 	printf("\nEngine: %s %g horsepower %g RPM redline\n", engine.name,
 			engine.hp, engine.redline);
 	printf("Transmission: %s %d gears ", trans.name, trans.numGears);
@@ -271,13 +292,13 @@ int main() {
 		choice[strlen(choice) - 1] = '\0'; //removes newline
 
 		if (!strcmp(choice, "help")) {
-			printf("Your choices are help, quit, drag, specs\n");
+			printf("Your choices are help, quit, drag, specs, money\n");
 		} else if (!strcmp(choice, "quit")) {
 			quit(&done);
 		} else if (!strcmp(choice, "drag")) {
 			drag(myEngine, myTrans, myDiff, myTire, engines, trannies, diffs,
 					tires);
-		} else if (!strcmp(choice, "specs")) {
+		} else if (!strcmp(choice, "specs") || !strcmp(choice,"money")) {
 			specs(myEngine, myTrans, myDiff, myTire);
 		} else if (!strcmp(choice, "test") && DEBUG) {
 			test(myTrans);
