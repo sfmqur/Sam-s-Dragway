@@ -107,8 +107,9 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 					gear++;
 					if (isPlayer) {
 						sleep(round(time - lastShift));
-						printf("You shift into gear %d at %g seconds\n", gear,
-								time);
+						printf(
+								"You shift into gear %d at %g seconds at %g MPH\n",
+								gear, time, mySpeed);
 						lastShift = time;
 					}
 				}
@@ -124,8 +125,7 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 
 	if (isPlayer) {
 		sleep(round(time - lastShift));
-		printf("FINISHED!!!\n\nYou finished in %g seconds at %g MPH\n\n", time,
-				mySpeed);
+		printf("FINISHED!!!\n\nYou finished in %g seconds\n\n", time);
 	}
 
 	myTime = time;
@@ -140,15 +140,15 @@ void drag(struct Engine engine, struct Transmission trans,
 	double winnings = 0;
 	double maxWinnings = 500; //winnings if you get 1st place
 
-	//calculate your time
+//calculate your time
 	double myTime = dragCalc(engine, trans, diff, tire, 1);
 
-	//Randomly Generate Opponents times
+//Randomly Generate Opponents times
 	int oppParts[numOpponents][4]; //4 is number of parts on car
 	double scores[numOpponents + 1];
 	int i; //for loop variables
 
-	//generate opponents specs
+//generate opponents specs
 	for (i = 0; i < numOpponents; i++) {
 		oppParts[i][0] = rand() % numEngines;
 		oppParts[i][1] = rand() % numTrans;
@@ -163,13 +163,13 @@ void drag(struct Engine engine, struct Transmission trans,
 	}
 	printf("\n");
 
-	//tell user what place they are
+//tell user what place they are
 	scores[numOpponents] = myTime; // adds my time in the array
 	int sortComplete;
 	double temp;
 	int place;
 
-	//bubble sort the scores
+//bubble sort the scores
 	for (sortComplete = numOpponents; sortComplete > 0; sortComplete--) {
 		for (i = 0; i < sortComplete; i++) {
 			if (scores[i] > scores[i + 1]) {
@@ -188,7 +188,7 @@ void drag(struct Engine engine, struct Transmission trans,
 		}
 	}
 
-	//give winnings based on time differential between you and top score
+//give winnings based on time differential between you and top score
 	winnings = scores[0] / myTime * maxWinnings;
 	money += winnings;
 
@@ -201,7 +201,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 		struct Engine *engines, struct Transmission *trannies,
 		struct Differential *diffs, struct Tire *tires) {
 
-	//initialized display parts, part num and price
+//initialized display parts, part num and price
 	double dispEngines[3][2];
 	double costEngine = 7000;
 	double dispTrannies[3][2];
@@ -214,7 +214,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 	int i, k;
 	char choice[bufferSize];
 
-	//chooses parts in store and the price for them
+//chooses parts in store and the price for them
 	for (i = 0; i < 3; i++) {
 		dispEngines[i][0] = rand() % numEngines;
 		dispEngines[i][1] = randPercent() * costEngine;
@@ -341,30 +341,29 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 				printf("You bought %s\n", diffs[dispDiffs[selection][0]].name);
 			}
 		} else if (!strcmp(choice, "tire")) {
-				printf("Which tire do you want?(3 to exit)\n");
-				fgets(selectionStr, bufferSize, stdin);
-				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
-				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
-						&& strcmp(selectionStr, "2")
-						&& strcmp(selectionStr, "3")) {
-					printf("Please Enter either 0, 1, or 2\n");
-					continue;
-				}
-				selection = atoi(selectionStr);
+			printf("Which tire do you want?(3 to exit)\n");
+			fgets(selectionStr, bufferSize, stdin);
+			selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+			if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+					&& strcmp(selectionStr, "2") && strcmp(selectionStr, "3")) {
+				printf("Please Enter either 0, 1, or 2\n");
+				continue;
+			}
+			selection = atoi(selectionStr);
 
-				if (selection == 3) {
-					break;
-				}
+			if (selection == 3) {
+				break;
+			}
 
-				if (dispTires[selection][1] > money) {
-					printf("You can't afford that\n");
-					break;
-				} else {
-					money -= dispTires[selection][1];
-					*myTires = tires[dispTires[selection][0]];
-					printf("You bought %s tires\n",
-							tires[dispTires[selection][0]].name);
-				}
+			if (dispTires[selection][1] > money) {
+				printf("You can't afford that\n");
+				break;
+			} else {
+				money -= dispTires[selection][1];
+				*myTires = tires[dispTires[selection][0]];
+				printf("You bought %s tires\n",
+						tires[dispTires[selection][0]].name);
+			}
 		} else {
 			printf("Please enter a valid option.\n");
 		}
