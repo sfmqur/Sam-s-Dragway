@@ -44,6 +44,10 @@ struct Tire {
 	double size; //in inches
 };
 
+double randPercent() {
+	return (double) rand() / (double) RAND_MAX;
+}
+
 //action functions
 void quit(int *done) {
 	char choice[bufferSize];
@@ -97,9 +101,10 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 				if (gear < trans.numGears) { //switches gears if not in max gear
 					rpm = 0;
 					gear++;
-					if(isPlayer) {
-						sleep(round(time-lastShift));
-						printf("You shift into gear %d at %g seconds\n",gear,time);
+					if (isPlayer) {
+						sleep(round(time - lastShift));
+						printf("You shift into gear %d at %g seconds\n", gear,
+								time);
 						lastShift = time;
 					}
 				}
@@ -113,11 +118,11 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 		} //end of else ie acceleration period
 	} //end of while loop
 
-	if(isPlayer){
-		sleep(round(time-lastShift));
-		printf("FINISHED!!!\n\nYou finished in %g seconds at %g MPH\n\n",time,mySpeed);
+	if (isPlayer) {
+		sleep(round(time - lastShift));
+		printf("FINISHED!!!\n\nYou finished in %g seconds at %g MPH\n\n", time,
+				mySpeed);
 	}
-
 
 	myTime = time;
 	return myTime;
@@ -180,15 +185,203 @@ void drag(struct Engine engine, struct Transmission trans,
 	}
 
 	//give winnings based on time differential between you and top score
-	if (place <= numOpponents) {
-		winnings = scores[0] / myTime * maxWinnings;
-		money += winnings;
-	}
+	winnings = scores[0] / myTime * maxWinnings;
+	money += winnings;
 
 	printf("\nYou got place %d and earned $%g\n\n", place, winnings);
 }
 
-//TODO: 1.0 shop and inventory functions here
+//TODO: 1.0 shop
+void shop(struct Engine *myEngine, struct Transmission *myTrans,
+		struct Differential *myDiff, struct Tire *myTires,
+		struct Engine *engines, struct Transmission *trannies,
+		struct Differential *diffs, struct Tire *tires) {
+
+	//initialized display parts, part num and price
+	double dispEngines[3][2];
+	double costEngine = 7000;
+	double dispTrannies[3][2];
+	double costTrans = 5000;
+	double dispDiffs[3][2];
+	double costDiff = 2000;
+	double dispTires[3][2];
+	double costTires = 1500;
+
+	int i, k;
+	char choice[bufferSize];
+
+	//chooses parts in store and the price for them
+	for (i = 0; i < 3; i++) {
+		dispEngines[i][0] = rand() % numEngines;
+		dispEngines[i][1] = randPercent() * costEngine;
+		dispTrannies[i][0] = rand() % numTrans;
+		dispTrannies[i][1] = randPercent() * costTrans;
+		dispDiffs[i][0] = rand() % numDiffs;
+		dispDiffs[i][1] = randPercent() * costDiff;
+		dispTires[i][0] = rand() % numTires;
+		dispTires[i][1] = randPercent() * costTires;
+	}
+
+	printf("\nEngines\n");
+	for (i = 0; i < 3; i++) {
+		printf("%d $%7g %15s: %6g HP %6g RPM redline\n", i, dispEngines[i][1],
+				engines[dispEngines[i][0]].name, engines[dispEngines[i][0]].hp,
+				engines[dispEngines[i][0]].redline);
+	}
+
+	printf("\nTrannies\n");
+	for (i = 0; i < 3; i++) {
+		printf("%d $%7g %15s: %d gears ", i, dispTrannies[i][1],
+				trannies[dispTrannies[i][0]].name,
+				trannies[dispTrannies[i][0]].numGears);
+		for (k = 0; k < trannies[dispTrannies[i][0]].numGears; k++) {
+			printf("%g ", trannies[dispTrannies[i][0]].ratios[k]);
+		}
+		printf("\n");
+	}
+
+	printf("\nDifferentials\n");
+	for (i = 0; i < 3; i++) {
+		printf("%d $%7g %s\n", i, dispDiffs[i][1], diffs[dispDiffs[i][0]].name);
+	}
+
+	printf("\nTires\n");
+	for (i = 0; i < 3; i++) {
+		printf("%d $%7g %s\n", i, dispTires[i][1], tires[dispTires[i][0]].name);
+	}
+
+	printf("\n");
+
+	char selectionStr[bufferSize];
+	int selection;
+
+	while (1) { //shop loop
+		selection = 0;
+		printf("You have $%6g\n", money);
+		printf("What would you like to buy?(exit to leave shop)\n");
+		printf("Your choices are: engine, trans, diff, tire\n");
+		fgets(choice, bufferSize, stdin);
+		choice[strlen(choice) - 1] = '\0'; //removes newline
+		if (!strcmp(choice, "exit")) {
+			break;
+		} else if (!strcmp(choice, "engine")) {
+			while (selection != 3) {
+				printf("Which engine do you want?(3 to exit)\n");
+				fgets(selectionStr, bufferSize, stdin);
+				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+						&& strcmp(selectionStr, "2")
+						&& strcmp(selectionStr, "3")) {
+					printf("Please Enter either 0, 1, or 2\n");
+					continue;
+				}
+				selection = atoi(selectionStr);
+
+				if (selection == 3) {
+					break;
+				}
+
+				if (dispEngines[selection][1] > money) {
+					printf("You can't afford that\n");
+					break;
+				} else {
+					money -= dispEngines[selection][1];
+					*myEngine = engines[dispEngines[selection][0]];
+					printf("You bought %s\n",
+							engines[dispEngines[selection][0]].name);
+				}
+
+			}
+		} else if (!strcmp(choice, "trans")) {
+			while (selection != 3) {
+				printf("Which transmission do you want?(3 to exit)\n");
+				fgets(selectionStr, bufferSize, stdin);
+				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+						&& strcmp(selectionStr, "2")
+						&& strcmp(selectionStr, "3")) {
+					printf("Please Enter either 0, 1, or 2\n");
+					continue;
+				}
+				selection = atoi(selectionStr);
+
+				if (selection == 3) {
+					break;
+				}
+
+				if (dispTrannies[selection][1] > money) {
+					printf("You can't afford that\n");
+					break;
+				} else {
+					money -= dispTrannies[selection][1];
+					*myTrans = trannies[dispTrannies[selection][0]];
+					printf("You bought %s\n",
+							trannies[dispTrannies[selection][0]].name);
+				}
+
+			}
+		} else if (!strcmp(choice, "diff")) {
+			printf("DIFFS!\n");
+			while (selection != 3) {
+				printf("Which differential do you want?(3 to exit)\n");
+				fgets(selectionStr, bufferSize, stdin);
+				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+						&& strcmp(selectionStr, "2")
+						&& strcmp(selectionStr, "3")) {
+					printf("Please Enter either 0, 1, or 2\n");
+					continue;
+				}
+				selection = atoi(selectionStr);
+
+				if (selection == 3) {
+					break;
+				}
+
+				if (dispDiffs[selection][1] > money) {
+					printf("You can't afford that\n");
+					break;
+				} else {
+					money -= dispDiffs[selection][1];
+					*myDiff = diffs[dispDiffs[selection][0]];
+					printf("You bought %s\n",
+							diffs[dispDiffs[selection][0]].name);
+				}
+
+			}
+		} else if (!strcmp(choice, "tire")) {
+			while (selection != 3) {
+				printf("Which tire do you want?(3 to exit)\n");
+				fgets(selectionStr, bufferSize, stdin);
+				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+						&& strcmp(selectionStr, "2")
+						&& strcmp(selectionStr, "3")) {
+					printf("Please Enter either 0, 1, or 2\n");
+					continue;
+				}
+				selection = atoi(selectionStr);
+
+				if (selection == 3) {
+					break;
+				}
+
+				if (dispTires[selection][1] > money) {
+					printf("You can't afford that\n");
+					break;
+				} else {
+					money -= dispTires[selection][1];
+					*myTires = tires[dispTires[selection][0]];
+					printf("You bought %s tires\n",
+							tires[dispTires[selection][0]].name);
+				}
+
+			}
+		} else {
+			printf("Please enter a valid option.\n");
+		}
+	} //end shop loop
+}
 
 void specs(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire) {
@@ -208,14 +401,13 @@ void specs(struct Engine engine, struct Transmission trans,
 	printf("Tires: %g inches\n\n", tire.size);
 }
 
-void test(struct Transmission trans) {
-	int i;
-	for (i = 0; i < trans.numGears; i++) {
-		printf("%g ", trans.ratios[i]);
-	}
+void test() {
+	printf("Money?? I got you covered\n");
+	scanf("%lf", &money);
 }
 
 int main() {
+	srand(time(NULL));
 //variables
 	int done = 0;
 	char choice[bufferSize];
@@ -292,13 +484,16 @@ int main() {
 		choice[strlen(choice) - 1] = '\0'; //removes newline
 
 		if (!strcmp(choice, "help")) {
-			printf("Your choices are help, quit, drag, specs, money\n");
+			printf("Your choices are help, quit, drag, shop, specs, money\n");
 		} else if (!strcmp(choice, "quit")) {
 			quit(&done);
 		} else if (!strcmp(choice, "drag")) {
 			drag(myEngine, myTrans, myDiff, myTire, engines, trannies, diffs,
 					tires);
-		} else if (!strcmp(choice, "specs") || !strcmp(choice,"money")) {
+		} else if (!strcmp(choice, "shop")) {
+			shop(&myEngine, &myTrans, &myDiff, &myTire, engines, trannies,
+					diffs, tires);
+		} else if (!strcmp(choice, "specs") || !strcmp(choice, "money")) {
 			specs(myEngine, myTrans, myDiff, myTire);
 		} else if (!strcmp(choice, "test") && DEBUG) {
 			test(myTrans);
