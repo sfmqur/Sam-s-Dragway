@@ -8,3 +8,13 @@ Hoondai 1.6L I4
 110 6500
 Coyote 5.0L V8
 412 7000
+Holden 308cc V8
+310 5000
+Chevrolet 350cc Small Block V8
+370 5500
+Northstar 4.6L V8
+290 6000
+Ford Straight 6 4.0L Turbo I6
+362 6500
+SRT Hellcat 6.2L V8
+707 6000

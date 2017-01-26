@@ -17,10 +17,10 @@
 #define numOpponents 5
 
 //number of each part
-const int numEngines = 5; // could replace with end of file line detection
-const int numTrans = 7;	//and increment these variables....this works fine
-const int numDiffs = 4;
-const int numTires = 5;
+const int numEngines = 10; // could replace with end of file line detection
+const int numTrans = 10;	//and increment these variables....this works fine
+const int numDiffs = 8;
+const int numTires = 9;
 
 double money = 0;
 
@@ -224,14 +224,14 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 
 	printf("\nEngines\n");
 	for (i = 0; i < 3; i++) {
-		printf("%d $%7g %15s: %6g HP %6g RPM redline\n", i, dispEngines[i][1],
+		printf("%d $%7g %20s: %6g HP %6g RPM redline\n", i, dispEngines[i][1],
 				engines[dispEngines[i][0]].name, engines[dispEngines[i][0]].hp,
 				engines[dispEngines[i][0]].redline);
 	}
 
 	printf("\nTrannies\n");
 	for (i = 0; i < 3; i++) {
-		printf("%d $%7g %15s: %d gears ", i, dispTrannies[i][1],
+		printf("%d $%7g %20s: %d gears ", i, dispTrannies[i][1],
 				trannies[dispTrannies[i][0]].name,
 				trannies[dispTrannies[i][0]].numGears);
 		for (k = 0; k < trannies[dispTrannies[i][0]].numGears; k++) {
@@ -265,92 +265,78 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 		if (!strcmp(choice, "exit")) {
 			break;
 		} else if (!strcmp(choice, "engine")) {
-			while (selection != 3) {
-				printf("Which engine do you want?(3 to exit)\n");
-				fgets(selectionStr, bufferSize, stdin);
-				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
-				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
-						&& strcmp(selectionStr, "2")
-						&& strcmp(selectionStr, "3")) {
-					printf("Please Enter either 0, 1, or 2\n");
-					continue;
-				}
-				selection = atoi(selectionStr);
+			printf("Which engine do you want?(3 to exit)\n");
+			fgets(selectionStr, bufferSize, stdin);
+			selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+			if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+					&& strcmp(selectionStr, "2") && strcmp(selectionStr, "3")) {
+				printf("Please Enter either 0, 1, or 2\n");
+				continue;
+			}
+			selection = atoi(selectionStr);
 
-				if (selection == 3) {
-					break;
-				}
+			if (selection == 3) {
+				break;
+			}
 
-				if (dispEngines[selection][1] > money) {
-					printf("You can't afford that\n");
-					break;
-				} else {
-					money -= dispEngines[selection][1];
-					*myEngine = engines[dispEngines[selection][0]];
-					printf("You bought %s\n",
-							engines[dispEngines[selection][0]].name);
-				}
-
+			if (dispEngines[selection][1] > money) {
+				printf("You can't afford that\n");
+				break;
+			} else {
+				money -= dispEngines[selection][1];
+				*myEngine = engines[dispEngines[selection][0]];
+				printf("You bought %s\n",
+						engines[dispEngines[selection][0]].name);
 			}
 		} else if (!strcmp(choice, "trans")) {
-			while (selection != 3) {
-				printf("Which transmission do you want?(3 to exit)\n");
-				fgets(selectionStr, bufferSize, stdin);
-				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
-				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
-						&& strcmp(selectionStr, "2")
-						&& strcmp(selectionStr, "3")) {
-					printf("Please Enter either 0, 1, or 2\n");
-					continue;
-				}
-				selection = atoi(selectionStr);
+			printf("Which transmission do you want?(3 to exit)\n");
+			fgets(selectionStr, bufferSize, stdin);
+			selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+			if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+					&& strcmp(selectionStr, "2") && strcmp(selectionStr, "3")) {
+				printf("Please Enter either 0, 1, or 2\n");
+				continue;
+			}
+			selection = atoi(selectionStr);
 
-				if (selection == 3) {
-					break;
-				}
+			if (selection == 3) {
+				break;
+			}
 
-				if (dispTrannies[selection][1] > money) {
-					printf("You can't afford that\n");
-					break;
-				} else {
-					money -= dispTrannies[selection][1];
-					*myTrans = trannies[dispTrannies[selection][0]];
-					printf("You bought %s\n",
-							trannies[dispTrannies[selection][0]].name);
-				}
-
+			if (dispTrannies[selection][1] > money) {
+				printf("You can't afford that\n");
+				break;
+			} else {
+				money -= dispTrannies[selection][1];
+				*myTrans = trannies[dispTrannies[selection][0]];
+				printf("You bought %s\n",
+						trannies[dispTrannies[selection][0]].name);
 			}
 		} else if (!strcmp(choice, "diff")) {
 			printf("DIFFS!\n");
-			while (selection != 3) {
-				printf("Which differential do you want?(3 to exit)\n");
-				fgets(selectionStr, bufferSize, stdin);
-				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
-				if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
-						&& strcmp(selectionStr, "2")
-						&& strcmp(selectionStr, "3")) {
-					printf("Please Enter either 0, 1, or 2\n");
-					continue;
-				}
-				selection = atoi(selectionStr);
+			printf("Which differential do you want?(3 to exit)\n");
+			fgets(selectionStr, bufferSize, stdin);
+			selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
+			if (strcmp(selectionStr, "0") && strcmp(selectionStr, "1")
+					&& strcmp(selectionStr, "2") && strcmp(selectionStr, "3")) {
+				printf("Please Enter either 0, 1, or 2\n");
+				continue;
+			}
+			selection = atoi(selectionStr);
 
-				if (selection == 3) {
-					break;
-				}
+			if (selection == 3) {
+				break;
+			}
 
-				if (dispDiffs[selection][1] > money) {
-					printf("You can't afford that\n");
-					break;
-				} else {
-					money -= dispDiffs[selection][1];
-					*myDiff = diffs[dispDiffs[selection][0]];
-					printf("You bought %s\n",
-							diffs[dispDiffs[selection][0]].name);
-				}
-
+			if (dispDiffs[selection][1] > money) {
+				printf("You can't afford that\n");
+				break;
+			} else {
+				money -= dispDiffs[selection][1];
+				*myDiff = diffs[dispDiffs[selection][0]];
+				printf("You bought %s\n", diffs[dispDiffs[selection][0]].name);
 			}
 		} else if (!strcmp(choice, "tire")) {
-			while (selection != 3) {
 				printf("Which tire do you want?(3 to exit)\n");
 				fgets(selectionStr, bufferSize, stdin);
 				selectionStr[strlen(selectionStr) - 1] = '\0'; //removes newline
@@ -375,8 +361,6 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 					printf("You bought %s tires\n",
 							tires[dispTires[selection][0]].name);
 				}
-
-			}
 		} else {
 			printf("Please enter a valid option.\n");
 		}
