@@ -1,8 +1,12 @@
-/*
- * dragway.c //TODO: 1.0 fix header
+/*      Sam's Dragway
+ * 
  *
- *  Created on: Jan 18, 2017
+ *  Created: January 2017
  *      Author: Sam
+ *
+ * A text based drag racing simulator with an emphasis on vehicle builds versus the driving of the vehicle. 
+ *   The program is built more for entertainment than for physical realism as the only factors that are currently
+ *   in the drag calculation are, horsepower, transmission ratios, differential ratio, and tire size.  
  */
 
 #include<math.h>
@@ -11,7 +15,7 @@
 #include<string.h>
 #include<unistd.h>
 
-#define DEBUG 1
+#define DEBUG 0
 #define bufferSize 50
 #define pi 3.14159265358979
 #define numOpponents 5
@@ -134,7 +138,7 @@ void drag(struct Engine engine, struct Transmission trans,
 		struct Tire *tires) {
 
 	double winnings = 0;
-	double maxWinnings = 300; //winnings if you get 1st place
+	double maxWinnings = 500; //winnings if you get 1st place
 
 	//calculate your time
 	double myTime = dragCalc(engine, trans, diff, tire, 1);
@@ -224,7 +228,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 
 	printf("\nEngines\n");
 	for (i = 0; i < 3; i++) {
-		printf("%d $%7g %20s: %6g HP %6g RPM redline\n", i, dispEngines[i][1],
+		printf("%d $%7g %30s: %6g HP %6g RPM redline\n", i, dispEngines[i][1],
 				engines[dispEngines[i][0]].name, engines[dispEngines[i][0]].hp,
 				engines[dispEngines[i][0]].redline);
 	}
@@ -458,7 +462,7 @@ int main() {
 
 //assign default parts
 	struct Engine myEngine = engines[0];
-	struct Transmission myTrans = trannies[0];
+	struct Transmission myTrans = trannies[7];
 	struct Differential myDiff = diffs[0];
 	struct Tire myTire = tires[0];
 
