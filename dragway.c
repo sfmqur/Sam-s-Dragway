@@ -15,18 +15,20 @@
 #include<string.h>
 #include<unistd.h>
 
-#define DEBUG 0
+#define DEBUG 0 //debug allows you to give yourself money using the test command
 #define bufferSize 50
 #define pi 3.14159265358979
 #define numOpponents 5
 
-//number of each part
-const int numEngines = 10; // could replace with end of file line detection
-const int numTrans = 10;	//and increment these variables....this works fine
+//number of each part in their files
+const int numEngines = 10;
+const int numTrans = 10;
 const int numDiffs = 8;
 const int numTires = 9;
 
 double money = 0;
+double bestTime = 99999; //99999 because new times need to be less than old best time. no time is less than 0
+double lastTime = 0;
 
 //structures
 struct Engine {
@@ -48,7 +50,7 @@ struct Tire {
 	double size; //in inches
 };
 
-double randPercent() {
+double randPercent() { //returns random decimal from 0 to 1;
 	return (double) rand() / (double) RAND_MAX;
 }
 
@@ -81,7 +83,7 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 	int gear = 1;
 	double step = 0.01; //seconds
 
-	if (isPlayer) {
+	if (isPlayer) { //isPlayer outputs only when it is the player
 		printf("\nREADY\n");
 		sleep(1);
 		printf("SET\n");
@@ -97,7 +99,7 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 			if (rpm + (drdt * step) > engine.redline) { //does little time step
 				tempdrdt = engine.redline - rpm;
 				rpm += tempdrdt;
-				tempstep = 1 / (rpmPerSecond * engine.hp / tempdrdt);
+				tempstep = 1 / (rpmPerSecond * engine.hp / tempdrdt); //calculates time to get from beginning rpm to the redline
 				time += tempstep;
 				mySpeed = rpm / trans.ratios[gear - 1] / diff.ratio * pi
 						* tire.size / 12 / 5280 * 60; //miles an hour
@@ -125,7 +127,7 @@ double dragCalc(struct Engine engine, struct Transmission trans,
 
 	if (isPlayer) {
 		sleep(round(time - lastShift));
-		printf("FINISHED!!!\n\nYou finished in %g seconds\n\n", time);
+		printf("FINISHED!!!\n\nYou finished in %g seconds\n", time);
 	}
 
 	myTime = time;
@@ -142,10 +144,20 @@ void drag(struct Engine engine, struct Transmission trans,
 
 //calculate your time
 	double myTime = dragCalc(engine, trans, diff, tire, 1);
-
+	if (myTime < bestTime) {
+		bestTime = myTime;
+		printf("That is your new personal best!!!\n");
+	} else {
+		printf("Your personnal best is %g seconds.\n", bestTime);
+	}
+	if (lastTime != 0) {
+		printf("Your last time was %g seconds\n", lastTime);
+	}
+	printf("\n");
+	lastTime = myTime;
 //Randomly Generate Opponents times
 	int oppParts[numOpponents][4]; //4 is number of parts on car
-	double scores[numOpponents + 1];
+	double scores[numOpponents + 1]; //room for player in scores array
 	int i; //for loop variables
 
 //generate opponents specs
@@ -155,15 +167,15 @@ void drag(struct Engine engine, struct Transmission trans,
 		oppParts[i][2] = rand() % numDiffs;
 		oppParts[i][3] = rand() % numTires;
 		scores[i] = dragCalc(engines[oppParts[i][0]], trannies[oppParts[i][1]],
-				diffs[oppParts[i][2]], tires[oppParts[i][3]], 0);
+				diffs[oppParts[i][2]], tires[oppParts[i][3]], 0); //opponent time calculation
 	}
 
-	for (i = 0; i < numOpponents; i++) {
+	for (i = 0; i < numOpponents; i++) { //output opponent scores
 		printf("Opponent %d: %g seconds\n", i + 1, scores[i]);
 	}
 	printf("\n");
 
-//tell user what place they are
+//creates the standings
 	scores[numOpponents] = myTime; // adds my time in the array
 	int sortComplete;
 	double temp;
@@ -195,7 +207,6 @@ void drag(struct Engine engine, struct Transmission trans,
 	printf("\nYou got place %d and earned $%g\n\n", place, winnings);
 }
 
-//TODO: 1.0 shop
 void shop(struct Engine *myEngine, struct Transmission *myTrans,
 		struct Differential *myDiff, struct Tire *myTires,
 		struct Engine *engines, struct Transmission *trannies,
@@ -216,8 +227,8 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 
 //chooses parts in store and the price for them
 	for (i = 0; i < 3; i++) {
-		dispEngines[i][0] = rand() % numEngines;
-		dispEngines[i][1] = randPercent() * costEngine;
+		dispEngines[i][0] = rand() % numEngines; //stores integer versus structure, it saves memory
+		dispEngines[i][1] = randPercent() * costEngine; //cost is percentage of teh max cost for each part
 		dispTrannies[i][0] = rand() % numTrans;
 		dispTrannies[i][1] = randPercent() * costTrans;
 		dispDiffs[i][0] = rand() % numDiffs;
@@ -226,6 +237,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 		dispTires[i][1] = randPercent() * costTires;
 	}
 
+	//next 4 print then for loops print the parts on sale on the screen
 	printf("\nEngines\n");
 	for (i = 0; i < 3; i++) {
 		printf("%d $%7g %30s: %6g HP %6g RPM redline\n", i, dispEngines[i][1],
@@ -260,7 +272,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 	int selection;
 
 	while (1) { //shop loop
-		selection = 0;
+		selection = 0; //clears selection so you can enter into the boy specific part while loop
 		printf("You have $%6g\n", money);
 		printf("What would you like to buy?(exit to leave shop)\n");
 		printf("Your choices are: engine, trans, diff, tire\n");
@@ -277,7 +289,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 				printf("Please Enter either 0, 1, or 2\n");
 				continue;
 			}
-			selection = atoi(selectionStr);
+			selection = atoi(selectionStr); //converts the string to an integer
 
 			if (selection == 3) {
 				break;
@@ -287,9 +299,9 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 				printf("You can't afford that\n");
 				break;
 			} else {
-				money -= dispEngines[selection][1];
-				*myEngine = engines[dispEngines[selection][0]];
-				printf("You bought %s\n",
+				money -= dispEngines[selection][1]; //subtracts cost of part from your money
+				*myEngine = engines[dispEngines[selection][0]]; //assigns the engine you bought as your engine
+				printf("You bought %s\n\n",
 						engines[dispEngines[selection][0]].name);
 			}
 		} else if (!strcmp(choice, "trans")) {
@@ -301,7 +313,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 				printf("Please Enter either 0, 1, or 2\n");
 				continue;
 			}
-			selection = atoi(selectionStr);
+			selection = atoi(selectionStr); //string to integer
 
 			if (selection == 3) {
 				break;
@@ -311,9 +323,9 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 				printf("You can't afford that\n");
 				break;
 			} else {
-				money -= dispTrannies[selection][1];
-				*myTrans = trannies[dispTrannies[selection][0]];
-				printf("You bought %s\n",
+				money -= dispTrannies[selection][1]; //subtracts cost of part bought from user's money
+				*myTrans = trannies[dispTrannies[selection][0]]; //assigns transmission as user's part
+				printf("You bought %s\n\n",
 						trannies[dispTrannies[selection][0]].name);
 			}
 		} else if (!strcmp(choice, "diff")) {
@@ -326,7 +338,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 				printf("Please Enter either 0, 1, or 2\n");
 				continue;
 			}
-			selection = atoi(selectionStr);
+			selection = atoi(selectionStr); //string to integer
 
 			if (selection == 3) {
 				break;
@@ -336,8 +348,8 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 				printf("You can't afford that\n");
 				break;
 			} else {
-				money -= dispDiffs[selection][1];
-				*myDiff = diffs[dispDiffs[selection][0]];
+				money -= dispDiffs[selection][1]; //subtracts cost of part bought from user's money
+				*myDiff = diffs[dispDiffs[selection][0]]; //assigns new diff to user
 				printf("You bought %s\n", diffs[dispDiffs[selection][0]].name);
 			}
 		} else if (!strcmp(choice, "tire")) {
@@ -373,7 +385,7 @@ void shop(struct Engine *myEngine, struct Transmission *myTrans,
 void specs(struct Engine engine, struct Transmission trans,
 		struct Differential diff, struct Tire tire) {
 	int i;
-
+	//prints out current money and current parts on vehicle
 	printf("\nYou have $%g\n", money);
 	printf("\nEngine: %s %g horsepower %g RPM redline\n", engine.name,
 			engine.hp, engine.redline);
@@ -388,13 +400,16 @@ void specs(struct Engine engine, struct Transmission trans,
 	printf("Tires: %g inches\n\n", tire.size);
 }
 
-void test() {
+//!!!!!WARNING!!!!!
+//Test has potential to break and crash the program, it is a debug feature meant for
+//developer use
+void test() { //can be used only if DEBUG it 1
 	printf("Money?? I got you covered\n");
-	scanf("%lf", &money);
+	scanf("%lf", &money); //sets the user to specific money value,
 }
 
 int main() {
-	srand(time(NULL));
+	srand(time(NULL)); //seeds rand with the current time
 //variables
 	int done = 0;
 	char choice[bufferSize];
@@ -414,9 +429,9 @@ int main() {
 		printf("Error from reading from file: engines.txt");
 	}
 	for (i = 0; i < numEngines; i++) {
-		fgets(engines[i].name, bufferSize, fp);
+		fgets(engines[i].name, bufferSize, fp); //reads name
 		engines[i].name[strlen(engines[i].name) - 1] = '\0'; //removes newline
-		fscanf(fp, "%lf %lf\n", &engines[i].hp, &engines[i].redline);
+		fscanf(fp, "%lf %lf\n", &engines[i].hp, &engines[i].redline); //reads numbers
 	}
 	fclose(fp);
 
@@ -426,8 +441,9 @@ int main() {
 		printf("Error from reading from file: transmissions.txt");
 	}
 	for (i = 0; i < numTrans; i++) {
-		fgets(trannies[i].name, bufferSize, fp);
+		fgets(trannies[i].name, bufferSize, fp); //reads name
 		trannies[i].name[strlen(trannies[i].name) - 1] = '\0'; //removes newline
+		//reads numbers
 		fscanf(fp, "%d %lf %lf %lf %lf %lf %lf\n", &trannies[i].numGears,
 				&trannies[i].ratios[0], &trannies[i].ratios[1],
 				&trannies[i].ratios[2], &trannies[i].ratios[3],
@@ -441,9 +457,9 @@ int main() {
 		printf("Error from reading from file: differentials.txt");
 	}
 	for (i = 0; i < numDiffs; i++) {
-		fgets(diffs[i].name, bufferSize, fp);
+		fgets(diffs[i].name, bufferSize, fp); //reads name
 		diffs[i].name[strlen(diffs[i].name) - 1] = '\0'; //removes newline
-		fscanf(fp, "%lf\n", &diffs[i].ratio);
+		fscanf(fp, "%lf\n", &diffs[i].ratio); //reads numbers
 	}
 	fclose(fp);
 
@@ -453,9 +469,9 @@ int main() {
 		printf("Error from reading from file: tires.txt");
 	}
 	for (i = 0; i < numTires; i++) {
-		fgets(tires[i].name, bufferSize, fp);
+		fgets(tires[i].name, bufferSize, fp); //reads name
 		tires[i].name[strlen(tires[i].name) - 1] = '\0'; //removes newline
-		fscanf(fp, "%lf\n", &tires[i].size);
+		fscanf(fp, "%lf\n", &tires[i].size); //reads numbers
 	}
 	fclose(fp);
 
